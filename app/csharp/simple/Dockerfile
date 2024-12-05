@@ -17,4 +17,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 COPY .env .
+ENV AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED=true
+ENV AZURE_EXPERIMENTAL_ENABLE_ACTIVITY_SOURCE=true
 ENTRYPOINT ["dotnet", "simple.dll"]

@@ -1,8 +1,13 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using DotNetEnv;
+using System;
+
+AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
+AppContext.SetSwitch("Azure.Experimental.TraceGenAIMessageContent", true);
 
 Env.Load();
 
@@ -24,6 +29,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton<Simple.Services.AoaiService>();
 builder.Services.AddSingleton<Simple.Services.SearchClientBuilder>();
 builder.Services.AddSingleton<Simple.Services.AiSearchService>();
+
+builder.Services.AddOpenTelemetry().UseAzureMonitor().WithTracing();
 
 var app = builder.Build();
 

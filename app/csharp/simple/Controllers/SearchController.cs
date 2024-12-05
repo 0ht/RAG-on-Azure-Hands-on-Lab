@@ -50,6 +50,11 @@ public class SearchController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// ベクトル検索を実行します。
+    /// </summary>
+    /// <param name="query">検索クエリ。</param>
+    /// <returns>検索結果を含む <see cref="IActionResult"/>。</returns>
     [HttpGet("vector")]
     public async Task<IActionResult> VectorSearch(string query)
     {

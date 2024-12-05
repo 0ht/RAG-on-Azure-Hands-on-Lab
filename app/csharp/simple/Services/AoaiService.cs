@@ -8,6 +8,7 @@ using System.Text;
 using Newtonsoft.Json;
 
 using Azure;
+using Azure.AI.Inference;
 using Azure.AI.OpenAI;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Indexes;
@@ -50,8 +51,6 @@ namespace Simple.Services
         /// <returns>非同期操作を表すタスク。タスクの結果にはチャット応答が含まれます。</returns>
         public async Task<string> GetChatResponseAsync(string query)
         {
-            var client = new AzureOpenAIClient(new Uri(aoaiEndpoint), new ApiKeyCredential(aoaiApiKey));
-            var chatClient = client.GetChatClient(aoaiDeployment);
             var systemMessage = """
                         あなたの役割は、ユーザーと親しみやすく、リラックスした雰囲気の会話を行うチャットボットとして機能することです。
                         ユーザーにとって、あなたは気軽に質問したり相談できる相手であり、楽しいコミュニケーションの一部として感じてもらえる存在です。
@@ -101,11 +100,26 @@ namespace Simple.Services
                         - 質問を返して会話を広げたり、ユーザーの興味に寄り添った話題を提供してください。
             
             """;
-            var completion = await chatClient.CompleteChatAsync(
-                new SystemChatMessage(systemMessage),
-                new UserChatMessage(query)
-            );
-            return completion.Value.Content[0].Text;
+            var endpoint = new Uri($"{Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")}openai/deployments/gpt-4o");
+            var credential = new AzureKeyCredential(System.Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY"));
+            var client = new ChatCompletionsClient(
+                            endpoint,
+                            credential,
+                            new AzureAIInferenceClientOptions()
+                        );
+            var requestOptions = new ChatCompletionsOptions()
+            {
+                Messages =
+                {
+                    new ChatRequestSystemMessage(systemMessage),
+                    new ChatRequestUserMessage(query),
+                },
+                Model = "gpt-4o",
+                Temperature = 1,
+                MaxTokens = 1000
+            };
+            Response<ChatCompletions> response = client.Complete(requestOptions);
+            return response.Value.Content;
         }
 
         /// <summary>
@@ -115,8 +129,6 @@ namespace Simple.Services
         /// <returns>非同期操作を表すタスク。タスクの結果には書き換えられたクエリが含まれます。</returns>
         public async Task<string> RewriteQueryAsync(string query)
         {
-            var client = new AzureOpenAIClient(new Uri(aoaiEndpoint), new ApiKeyCredential(aoaiApiKey));
-            var chatClient = client.GetChatClient(aoaiDeployment);
             var systemMessage = """
                         あなたの役割は、ユーザーが提供した自然言語の入力を、検索エンジンで効果的に使える検索クエリに変換することです。以下の要件を満たすようにクエリを書き換えてください：
                         1. 明確性: 曖昧な言葉を具体的で検索に適した表現に置き換えてください。
@@ -137,11 +149,27 @@ namespace Simple.Services
                         クエリ書き換えフォーマット:
                         {最適化されたクエリ}
             """;
-            var completion = await chatClient.CompleteChatAsync(
-                new SystemChatMessage(systemMessage),
-                new UserChatMessage(query)
-            );
-            return completion.Value.Content[0].Text;
+            var endpoint = new Uri($"{Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")}openai/deployments/gpt-4o");
+            var credential = new AzureKeyCredential(System.Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY"));
+            var client = new ChatCompletionsClient(
+                            endpoint,
+                            credential,
+                            new AzureAIInferenceClientOptions()
+                        );
+            var requestOptions = new ChatCompletionsOptions()
+            {
+                Messages =
+                {
+                    new ChatRequestSystemMessage(systemMessage),
+                    new ChatRequestUserMessage(query),
+                },
+                Model = "gpt-4o",
+                Temperature = 1,
+                MaxTokens = 1000
+            };
+            client.Complete(requestOptions);
+            Response<ChatCompletions> response = client.Complete(requestOptions);
+            return response.Value.Content;
         }
 
         /// <summary>
@@ -152,8 +180,6 @@ namespace Simple.Services
         /// <returns>非同期操作を表すタスク。タスクの結果には生成された回答が含まれます。</returns>
         public async Task<string> GenerateAnswerAsync(string query, List<SearchDocument> searchResults)
         {
-            var client = new AzureOpenAIClient(new Uri(aoaiEndpoint), new ApiKeyCredential(aoaiApiKey));
-            var chatClient = client.GetChatClient(aoaiDeployment);
             var systemMessage = """
                         あなたの役割は、Azure AI Search から提供された検索結果をもとに、ユーザーの質問やリクエストに応じた適切な回答を生成することです。
                         検索結果の内容を分析・要約し、ユーザーが理解しやすく、実用的な形で情報を提示してください。以下の要件を守って応答を作成してください。
@@ -196,12 +222,26 @@ namespace Simple.Services
                         - 検索結果の範囲: Azure AI Search が提供する結果を正確に把握し、ユーザーの意図に関連性の高い情報を優先してください。
                         - 不足情報への対応: 必要に応じて、「追加情報が必要な場合は、もう少し具体的な質問を教えてください」と促してください。
             """;
-            var completion = await chatClient.CompleteChatAsync(
-                new SystemChatMessage(systemMessage),
-                new UserChatMessage(query),
-                new UserChatMessage(JsonConvert.SerializeObject(searchResults))
-            );
-            return completion.Value.Content[0].Text;
+            var endpoint = new Uri($"{Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")}openai/deployments/gpt-4o");
+            var credential = new AzureKeyCredential(System.Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY"));
+            var client = new ChatCompletionsClient(
+                            endpoint,
+                            credential,
+                            new AzureAIInferenceClientOptions()
+                        );
+            var requestOptions = new ChatCompletionsOptions()
+            {
+                Messages =
+                {
+                    new ChatRequestSystemMessage(systemMessage),
+                    new ChatRequestUserMessage(query),
+                },
+                Model = "gpt-4o",
+                Temperature = 1,
+                MaxTokens = 1000
+            };
+            Response<ChatCompletions> response = client.Complete(requestOptions);
+            return response.Value.Content;
         }
 
         public ReadOnlyMemory<float> GetVectorizedQuery(string query)

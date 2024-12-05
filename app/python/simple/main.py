@@ -7,6 +7,8 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from starlette import status
 
+from azure.monitor.opentelemetry import configure_azure_monitor
+
 from swagger.model.chat_response import ChatResponse
 from service.aoai_service import get_embedding_from_query, rewrite_query, generate_answer, chat
 
@@ -14,6 +16,11 @@ from service.ai_search_service import search_fulltext, search_vector
 
 
 load_dotenv()
+
+
+configure_azure_monitor(
+    enable_live_metrics=True,
+)
 
 
 app = FastAPI(
