@@ -16,7 +16,7 @@ RUN dotnet publish "simple.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY .env .
+# COPY .env .
 ENV AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED=true
 ENV AZURE_EXPERIMENTAL_ENABLE_ACTIVITY_SOURCE=true
 ENTRYPOINT ["dotnet", "simple.dll"]
